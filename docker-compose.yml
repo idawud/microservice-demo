@@ -4,27 +4,35 @@ services:
   # customers service
   customers:
     image: customers
+    container_name: customers
     build: 
-      context: .
-      dockerfile: ./customers/Dockerfile
+      context: ./customers
+      dockerfile: ./Dockerfile
     ports:
       - 8080:8080
   # orders service
   orders:
     image: orders
+    container_name: orders
     build: 
-      context: .
-      dockerfile: ./orders/Dockerfile
+      context: ./orders
+      dockerfile: ./Dockerfile
     ports:
       - 8081:8081
   # gateway service (also the main service here..)
-  microserviceexample:
-    image: microserviceexample
+  gateway:
+    image: gateway
+    container_name: microservice-example-gateway
     depends_on:
       - customers
       - orders
     build:
-      context: .
-      dockerfile: ./gateway/Dockerfile
+      context: ./gateway
+      dockerfile: ./Dockerfile
+    environment:
+      - ORDERS_SERVICE_HOST=orders
+      - ORDERS_SERVICE_PORT=8081
+      - CUSTOMERS_SERVICE_HOST=customers
+      - CUSTOMERS_SERVICE_PORT=8080
     ports:
       - 8082:8082

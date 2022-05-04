@@ -19,7 +19,15 @@ import java.util.List;
 
 @SpringBootApplication
 public class GatewayApplication {
-	public static final String CUSTOMER_SERVICE_URL = "http://localhost:8080";
+	public final String CUSTOMER_SERVICE_URL;
+
+	GatewayApplication() {
+		this.CUSTOMER_SERVICE_URL = String.format(
+		"http://%s:%s", 
+			System.getenv().getOrDefault("CUSTOMERS_SERVICE_HOST", "localhost"),
+			System.getenv().getOrDefault("CUSTOMERS_SERVICE_PORT", "8080")
+		);
+	}
 
 	@Bean
 	RouteLocator gateway(RouteLocatorBuilder builder) {
@@ -28,7 +36,7 @@ public class GatewayApplication {
 						.filters(gf -> gf.setPath("/customers")
 								.addResponseHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "*")
 						)
-						.uri(CUSTOMER_SERVICE_URL))
+						.uri(this.CUSTOMER_SERVICE_URL))
 				.build();
 	}
 
@@ -39,7 +47,10 @@ public class GatewayApplication {
 
 	@Bean
 	RSocketRequester rSocketRequester(RSocketRequester.Builder builder) {
-		return builder.tcp("localhost", 8081);
+		String orderServiceHost = System.getenv().getOrDefault("ORDERS_SERVICE_HOST", "localhost");
+		String orderSericePort = System.getenv().getOrDefault("ORDERS_SERVICE_PORT", "8081");
+
+		return builder.tcp(orderServiceHost, Integer.valueOf(orderSericePort));
 	}
 
 	@Bean
@@ -92,20 +103,25 @@ class CrmGraphqlController {
 		return this.client.getOrders(customer.id());
 	}
 }
+
 class CrmClient {
-	public static final String CUSTOMER_SERVICE_URL = "http://localhost:8080";
 	public static final String CUSTOMERS_ENDPOINT = "/customers";
+	public final String CUSTOMER_SERVICE_URL;
 	private final WebClient webClient;
 	private final RSocketRequester requester;
 
 	CrmClient(WebClient webClient, RSocketRequester requester) {
+		this.CUSTOMER_SERVICE_URL = String.format(
+			"http://%s:%s", System.getenv().getOrDefault("CUSTOMERS_SERVICE_HOST", "localhost"),
+			 System.getenv().getOrDefault("CUSTOMERS_SERVICE_PORT", "8080")
+			);
 		this.webClient = webClient;
 		this.requester = requester;
 	}
 
 	Flux<Customer> getCustomers() {
 		return this.webClient.get()
-				.uri(CUSTOMER_SERVICE_URL + CUSTOMERS_ENDPOINT)
+				.uri(this.CUSTOMER_SERVICE_URL + CUSTOMERS_ENDPOINT)
 				.retrieve()
 				.bodyToFlux(Customer.class);
 	}
