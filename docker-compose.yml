@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  # customers service
+  customers:
+    image: customers
+    build: 
+      context: .
+      dockerfile: ./customers/Dockerfile
+    ports:
+      - 8080:8080
+  # orders service
+  orders:
+    image: orders
+    build: 
+      context: .
+      dockerfile: ./orders/Dockerfile
+    ports:
+      - 8081:8081
+  # gateway service (also the main service here..)
+  microserviceexample:
+    image: microserviceexample
+    depends_on:
+      - customers
+      - orders
+    build:
+      context: .
+      dockerfile: ./gateway/Dockerfile
+    ports:
+      - 8082:8082
