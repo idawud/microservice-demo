@@ -1,4 +1,4 @@
-package com.example.customers;
+package tech.idawud.customers;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
