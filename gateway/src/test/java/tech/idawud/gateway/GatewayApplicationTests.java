@@ -1,4 +1,4 @@
-package com.example.gateway;
+package tech.idawud.gateway;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
